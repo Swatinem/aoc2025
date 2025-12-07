@@ -123,6 +123,7 @@ pub fn b(input: &str) -> i32 {
     removed
 }
 
+#[cfg(test)]
 const TEST: &str = r#"
 ..@@.@@@@.
 @@@.@.@.@@

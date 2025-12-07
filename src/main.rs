@@ -2,9 +2,10 @@ use std::fs::read_to_string;
 
 // mod day1;
 // mod day2;
+// mod day3;
+// mod day4;
 
-mod day3;
-mod day4;
+mod day5;
 
 fn main() {
     // let input = read_to_string("inputs/day1.txt").unwrap();
@@ -15,11 +16,15 @@ fn main() {
     // dbg!(day2::a(&input));
     // dbg!(day2::b(&input));
 
-    let input = read_to_string("inputs/day3.txt").unwrap();
-    dbg!(day3::a(&input));
-    dbg!(day3::b(&input));
+    // let input = read_to_string("inputs/day3.txt").unwrap();
+    // dbg!(day3::a(&input));
+    // dbg!(day3::b(&input));
 
-    let input = read_to_string("inputs/day4.txt").unwrap();
-    dbg!(day4::a(&input));
-    dbg!(day4::b(&input));
+    // let input = read_to_string("inputs/day4.txt").unwrap();
+    // dbg!(day4::a(&input));
+    // dbg!(day4::b(&input));
+
+    let input = read_to_string("inputs/day5.txt").unwrap();
+    dbg!(day5::a(&input));
+    dbg!(day5::b(&input));
 }
