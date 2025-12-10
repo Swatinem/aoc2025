@@ -1,5 +1,4 @@
 // <https://matklad.github.io/2021/11/07/generate-all-the-things.html>
-
 struct Gen {
     started: bool,
     v: Vec<(u32, u32)>,
@@ -111,58 +110,38 @@ pub fn a(input: &str) -> u32 {
 pub fn b(input: &str) -> u64 {
     let mut sum = 0;
 
-    let mut joltage = vec![];
     for manual in input.trim().lines() {
         let manual = parse_input(manual);
+        let max_joltage = *manual.joltage.iter().max().unwrap();
 
-        let max_per_button: Vec<_> = manual
+        let mut problem = highs::RowProblem::new();
+
+        let mut button_coeff: Vec<_> = manual
             .buttons
             .iter()
-            .map(|wiring| {
-                manual
-                    .joltage
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(idx, joltage)| (wiring & (1 << idx) > 0).then_some(*joltage))
-                    .min()
-                    .unwrap()
-            })
+            .map(|_| (problem.add_integer_column(1.0, 0..=max_joltage), 0.0))
             .collect();
-        dbg!(&manual, &max_per_button);
 
-        let mut fewest = max_per_button.iter().sum();
-
-        let mut g = Gen::new();
-        'permute: while !g.done() {
-            joltage.clear();
-            joltage.resize(manual.joltage.len(), 0);
-
-            let button_presses = max_per_button.iter().map(|max| g.get(*max));
-
-            let mut pressed_buttons = 0;
-            for (presses, wiring) in button_presses.zip(manual.buttons.iter()) {
-                if presses > 0 {
-                    pressed_buttons += presses;
-                    if pressed_buttons > fewest {
-                        continue 'permute;
-                    }
-                    for idx in 0..manual.joltage.len() {
-                        if wiring & (1 << idx) > 0 {
-                            joltage[idx] += presses;
-
-                            if joltage[idx] > manual.joltage[idx] {
-                                continue 'permute;
-                            }
-                        }
-                    }
-                }
+        for (idx, joltage) in manual.joltage.iter().enumerate() {
+            for (wiring, (_, coeff)) in manual.buttons.iter().zip(button_coeff.iter_mut()) {
+                *coeff = if (wiring & (1 << idx)) > 0 { 1.0 } else { 0.0 };
+                eprint!("{coeff} ");
             }
-            if joltage == manual.joltage {
-                fewest = fewest.min(pressed_buttons);
-            }
+
+            let bound: f64 = *joltage as _;
+            problem.add_row(bound..=bound, &button_coeff);
+            eprintln!("= {joltage}")
         }
-        dbg!(fewest);
-        sum += fewest as u64;
+
+        let solution = problem.optimise(highs::Sense::Minimise).solve();
+        let presses: f64 = solution.get_solution().columns().iter().sum();
+        sum += presses as u64;
+
+        eprint!("solution {presses} = ");
+        for p in solution.get_solution().columns().iter() {
+            eprint!("{} ", p);
+        }
+        eprintln!();
     }
 
     sum
